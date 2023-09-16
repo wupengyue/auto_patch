@@ -1,3 +1,4 @@
+from app import db
 from app.models import ProjectCase
 from sqlalchemy import and_, desc
 
@@ -23,3 +24,32 @@ def project_case_list(args):
             page=page, per_page=limit, error_out=False, count=True)
 
     return data
+
+
+def create_project_case(content):
+    pc = ProjectCase(content)
+
+    try:
+        db.session.add(pc)
+        db.session.commit()
+        return True, pc.case_id
+    except Exception as e:
+        db.session.rollback()
+        db.session.close()
+        err_msg = f' add ProjectCase failed --->{e}'
+    return False, err_msg
+
+
+def update_project_case(content):
+    try:
+        pc = ProjectCase.query.filter(ProjectCase.case_id == content.get('case_id')).first()
+        pass
+        db.session.add(pc)
+        db.session.merge(pc)
+        db.session.commit()
+        return True, 'update project case success'
+    except Exception as e:
+        db.session.rollback()
+        db.session.close()
+        err_msg = f' add ProjectCase failed --->{e}'
+    return False, err_msg

@@ -1,4 +1,5 @@
 from app import db
+from app.common import get_now_time
 
 
 # generate code
@@ -23,14 +24,17 @@ class ProjectCase(db.Model):
     update_time = db.Column(db.Date)
     remark = db.Column(db.String(200))
 
-    def __init__(self, attr, branch, pname, enable, created_at, last_activity_at, date=None):
-        self.project_id = attr.get('id')
-        self.description = attr.get('description')
-        self.project_name = attr.get('name')
-        self.branch_name = branch.get('name')
-        self.pname = pname
-        self.enable = enable
-        self.is_default_branch = branch.get('default')
-        self.date = date or '2021-10-01'
-        self.created_at = created_at
-        self.last_activity_at = last_activity_at
+    def __init__(self, content):
+        self.case_id = content.get('case_id')
+        self.case_serial_number = content.get('case_serial_number')
+        self.case_sign = content.get('case_sign')
+        self.case_name = content.get('case_name')
+        self.project_id = content.get('project_id')
+        self.module_id = content.get('module_id')
+        self.case_type = content.get('case_type')
+        self.failcontinue = content.get('failcontinue')
+        self.create_by = content.get('create_by')
+        self.create_time = get_now_time()
+        self.update_by = content.get('update_by')
+        self.update_time = get_now_time()
+        self.remark = content.get('remark')

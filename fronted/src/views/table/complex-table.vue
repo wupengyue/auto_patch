@@ -1,91 +1,57 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input
-        v-model="listQuery.case_id"
-        placeholder="JIRA ID"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleFilter"
-      />
-      <el-select
-        v-model="listQuery.case_type"
-        placeholder="Type"
-        clearable
-        style="width: 130px; margin-left: 10px;"
-        class="filter-item"
-      >
+      <el-input v-model="listQuery.case_id" placeholder="JIRA ID" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-select v-model="listQuery.case_type" placeholder="Case Type" clearable style="width: 130px; margin-left: 10px;" class="filter-item">
         <el-option v-for="item in caseTypeOptions" :key="item" :label="item" :value="item" />
       </el-select>
-      <el-button
-        v-waves
-        class="filter-item"
-        type="primary"
-        style="margin-left: 10px;"
-        icon="el-icon-search"
-        @click="handleFilter"
-      >
+      <el-button v-waves class="filter-item" type="primary" style="margin-left: 10px;" icon="el-icon-search" @click="handleFilter">
         Search
       </el-button>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px;"
-        type="primary"
-        icon="el-icon-edit"
-        @click="handleCreate"
-      >
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         Add
       </el-button>
     </div>
+    <p></p>
 
-    <el-table
-      :key="tableKey"
-      v-loading="listLoading"
-      :data="list"
-      border
-      fit
-      highlight-current-row
-      style="width: 100%;"
-    >
+    <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
       <el-table-column label="CASE ID" prop="id" sortable="custom" align="center" width="110">
-        <template slot-scope="{row}">
+        <template v-slot="{row}">
           <span>{{ row.case_id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="CaseName" min-width="150px">
-        <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.title }}</span>
-          <el-tag>{{ row.case_name }}</el-tag>
+      <el-table-column label="Case Name" min-width="150px">
+        <template v-slot="{row}">
+          {{ row.case_name }}
         </template>
       </el-table-column>
       <el-table-column label="Case Number" width="120px" align="center">
-        <template slot-scope="{row}">
+        <template v-slot="{row}">
           <span>{{ row.case_serial_number }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Case Sign" width="110px">
-        <template slot-scope="{row}">
+        <template v-slot="{row}">
           {{ row.case_sign }}
         </template>
       </el-table-column>
       <el-table-column label="Case Type" align="center" width="95">
-        <template slot-scope="{row}">
-          <span v-if="row.case_type" class="link-type" @click="handleFetchPv(row.pageviews)">{{ row.pageviews }}</span>
-          <span v-else>0</span>
+        <template v-slot="{row}">
+          {{ row.case_type }}
         </template>
       </el-table-column>
       <el-table-column label="Create At" width="160px" align="center">
-        <template slot-scope="{row}">
+        <template v-slot="{row}">
           <span>{{ row.create_time }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Update At" width="160px" align="center">
-        <template slot-scope="{row}">
+        <template v-slot="{row}">
           <span>{{ row.update_time }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Actions" align="center" width="200" class-name="small-padding fixed-width">
-        <template slot-scope="{row,$index}">
+        <template v-slot="{row,$index}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             Edit
           </el-button>
@@ -96,51 +62,26 @@
       </el-table-column>
     </el-table>
 
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
-      @pagination="getList"
-    />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList"/>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form
-        ref="dataForm"
-        :rules="rules"
-        :model="temp"
-        label-position="left"
-        label-width="70px"
-        style="width: 400px; margin-left:50px;"
-      >
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option
-              v-for="item in caseTypeOptions"
-              :key="item.key"
-              :label="item.display_name"
-              :value="item.key"
-            />
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="Case ID" prop="case_id">
+          <el-input v-model="temp.case_id" />
+        </el-form-item>
+        <el-form-item label="Case Name" prop="case_name">
+          <el-input v-model="temp.case_name" />
+        </el-form-item>
+        <el-form-item label="Case Number" prop="case_serial_number">
+          <el-input v-model="temp.case_serial_number" />
+        </el-form-item>
+        <el-form-item label="Case Sign" prop="case_sign">
+          <el-input v-model="temp.case_sign" />
+        </el-form-item>
+        <el-form-item label="Type" prop="case_type">
+          <el-select v-model="temp.case_type" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in caseTypeOptions" :key="item" :label="item" :value="item" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
-        </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
-        </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Remark">
-          <el-input
-            v-model="temp.remark"
-            :autosize="{ minRows: 2, maxRows: 4}"
-            type="textarea"
-            placeholder="Please input"
-          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -152,24 +93,13 @@
         </el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/table'
+import { fetchList, createProjectCase, updateProjectCase } from '@/api/table'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
-import { parseTime } from '@/utils' // secondary package based on el-pagination
 export default {
   name: 'ComplexTable',
   components: { Pagination },
@@ -190,12 +120,12 @@ export default {
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       temp: {
-        id: undefined,
-        remark: '',
-        timestamp: new Date(),
         case_id: '',
         case_type: '',
-        status: ''
+        status: '',
+        case_name: '',
+        case_serial_number: '',
+        case_sign: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -203,7 +133,6 @@ export default {
         update: 'Edit',
         create: 'Create'
       },
-      dialogPvVisible: false,
       pvData: [],
       rules: {
         type: [{ required: true, message: 'type is required', trigger: 'change' }],
@@ -231,13 +160,14 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
         title: '',
+        type: '',
+        case_id: '',
+        case_type: '',
         status: '',
-        type: ''
+        case_name: '',
+        case_serial_number: '',
+        case_sign: ''
       }
     },
     handleCreate() {
@@ -253,7 +183,7 @@ export default {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
+          createProjectCase(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
@@ -279,8 +209,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
+          updateProjectCase(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
@@ -302,21 +231,6 @@ export default {
         duration: 2000
       })
       this.list.splice(index, 1)
-    },
-    handleFetchPv(pv) {
-      fetchPv(pv).then(response => {
-        this.pvData = response.data.pvData
-        this.dialogPvVisible = true
-      })
-    },
-    formatJson(filterVal) {
-      return this.list.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
     }
   }
 }
