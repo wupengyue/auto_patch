@@ -50,10 +50,13 @@
           <span>{{ row.update_time }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" align="center" width="200" class-name="small-padding fixed-width">
+      <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
         <template v-slot="{row,$index}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             Edit
+          </el-button>
+          <el-button v-if="row.status!='done'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
+            Build
           </el-button>
           <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
             Delete
@@ -169,6 +172,13 @@ export default {
         case_serial_number: '',
         case_sign: ''
       }
+    },
+    handleModifyStatus(row, status) {
+      this.$message({
+        message: 'Success',
+        type: 'success'
+      })
+      row.status = status
     },
     handleCreate() {
       this.resetTemp()
